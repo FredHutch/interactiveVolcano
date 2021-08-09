@@ -18,19 +18,25 @@ ui <- fluidPage(
     # tab bar on main panel
     tabsetPanel(
                 tabPanel("Splash page",
-                         p("welcome to the carousel volcano plot app, 
+                         h3("welcome to the carousel volcano plot app, 
                            info about how this visualizaiton is created, where to find code, etc")),
                 # Data panel
                 tabPanel("Data",
                          h1("Provided dataset"),
-                         dataTableOutput("gene_data")),
+                         sidebarLayout(
+                           sidebarPanel( width = 3,
+                                         checkboxInput("show_de",
+                                                       "Show only differentially expressed genes",
+                                                       FALSE)),
+                           mainPanel(dataTableOutput("gene_data")))),
+                         
                 # Volcano plot panel
                 tabPanel("Volcano Plot",
                          h1("Interactive Volcano Plot"),
                          sidebarLayout(
                            sidebarPanel(width = 3,
                                         selectInput("gene_list",
-                                                    "Highlight a gene",
+                                                    "Highlight gene(s)",
                                                     sort(data[[gene_col]]),
                                                     multiple = TRUE,
                                                     selectize= TRUE)),
@@ -43,19 +49,30 @@ ui <- fluidPage(
 
 # server -------------------------
 server <- function(input, output) {
-  # output uploaded dataframe
-  output$gene_data <- renderDataTable(
-    data
-  )
   
-  # volcano plot output
+  # filter dataframe based on checkbox
+  filtered_gene_data <- reactive({
+    if (input$show_de) {
+      filter(data, is.DE != 0)
+    } else {
+      data
+    }
+  })
+  
+  # output dataframe
+  output$gene_data <- renderDataTable(
+    filtered_gene_data()
+  )
+
+  # output volcano plot
   output$volcano_plot <- renderPlot({
     plotVolcano(data, "logFC", "FDR", "Genename")
   })
   
-  # output nearPoint to volcano plot click as datatable  
-  output$info <- renderText(
-    paste0(input$volcano_click))
+  # output volcano_click info as text  
+  output$info <- renderText({
+    paste0(input$volcano_click)
+    })
 }
 
 # build app ----------------------
