@@ -75,7 +75,14 @@ ui <- fluidPage(
                                                     max = 1,
                                                     value = .05),
                                         # set logfc threshold
-                                        uiOutput("logfc_slider")),
+                                        uiOutput("logfc_slider"),
+                                        # show/hide logfc and pval lines
+                                        checkboxInput("show_pvalue_threshold",
+                                                      "Show P value threshold?",
+                                                      value = TRUE),
+                                        checkboxInput("show_logfc_threshold",
+                                                      "Show log fold change threshold?",
+                                                      value = TRUE)),
                                         # select genes to highlight
                                         #uiOutput("gene_selector")),
                          mainPanel(plotOutput("volcano_plot",
@@ -129,13 +136,13 @@ server <- function(input, output) {
   })
   
   # # gene
-  output$gene_selector <- renderUI({
-    selectInput("selected_genes",
-                "Highlight gene(s)",
-                sort(data[[input$gene_col]]),
-                multiple = TRUE,
-                selectize= TRUE)
-  })
+  # output$gene_selector <- renderUI({
+  #   selectInput("selected_genes",
+  #               "Highlight gene(s)",
+  #               sort(data[[input$gene_col]]),
+  #               multiple = TRUE,
+  #               selectize= TRUE)
+  # })
   
   # output volcano plot
   output$volcano_plot <- renderPlot({
@@ -143,8 +150,11 @@ server <- function(input, output) {
                 logfc_col = input$logfc_col, 
                 pval_col = input$pvalue_col,
                 gene_col = input$gene_col,
-                pval_thresh = .05,
-                logfc_thresh = 2)
+                pval_thresh = input$pvalue_threshold,
+                logfc_thresh = input$logfc_threshold,
+                de_vec = is_de(),
+                show_logfc_thresh = input$show_logfc_threshold,
+                show_pvalue_thresh = input$show_pvalue_threshold)
                 
   })
   
