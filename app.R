@@ -95,22 +95,24 @@ ui <- fluidPage(
                                         # set threshold line color
                                         textInput("threshold_color",
                                                   "Choose threshold lines color",
-                                                  "red"),
-                                        
-                                        # HIGHLIGHT GENES -----
-                                        h4("Highlight genes of interest:"),
-                                        
-                                        # select column for gene ID
-                                        selectInput("gene_col",
-                                                    "Select input column for gene ID",
-                                                    gene_cols,
-                                                    multiple = FALSE),
-                                        
-                                        # select genes to highlight
-                                        uiOutput("gene_selector")),
-                         mainPanel(plotOutput("volcano_plot",
+                                                  "red")),
+                           mainPanel(plotOutput("volcano_plot",
                                       click = "volcano_click"),
-                                   verbatimTextOutput("info"))
+                                     
+                                     # SELECT GENES OF INTEREST -----
+                                     h4("Highlight genes of interest:"),
+                                     
+                                     # select column for gene ID
+                                     selectInput("gene_col",
+                                                 "Select input column for gene ID",
+                                                 gene_cols,
+                                                 multiple = FALSE),
+                                     
+                                     # select genes to highlight
+                                     uiOutput("gene_selector"),
+                                     
+                                     # HIGHLIGHTED GENES TABLE -----
+                                     dataTableOutput("gene_highlight_tbl"))
                          ) # end sidebarLayout
                          ), # end tabPanel
                 # Data panel
@@ -167,18 +169,19 @@ de_gene_data <- reactive({
                 selectize= TRUE)
   })
   
-  # highlight_gene_data <- reactive({
-  #   if (length(input$highlight_genes) > 0) {
-  #     highlight_gene_tbl <- data[data[[input$gene_col]] %in% hihglight_genes]
-  #   } else {
-  #     highlight_gene_tbl <- data.
-  #   }
-  # })
-  # 
-  # # render a datatable of selected genes info
-  # output$gene_highlight_tbl <- renderDataTable({
-  #   data[data$Genename %in% input$highlight_genes]
-  # })
+  highlight_gene_data <- reactive({
+    if (length(input$highlight_genes) > 0) {
+      highlight_gene_data <- data[data[[input$gene_col]] %in% input$highlight_genes, c(input$gene_col, input$logfc_col, input$pvalue_col)]
+    } else {
+      highlight_gene_data <- data.frame(NA, NA, NA)
+      names(highlight_gene_data) <- c(input$gene_col, input$logfc_col, input$pvalue_col)
+    }
+  })
+
+  # render a datatable of selected genes info
+  output$gene_highlight_tbl <- renderDataTable({
+    highlight_gene_data()
+  })
   
   # output volcano plot
   output$volcano_plot <- renderPlot({
@@ -193,7 +196,6 @@ de_gene_data <- reactive({
                 show_pvalue_thresh = input$show_pvalue_threshold,
                 thresh_color = input$threshold_color,
                 highlight_genes = input$highlight_genes)
-                
   })
   
   # output volcano_click info as text  
