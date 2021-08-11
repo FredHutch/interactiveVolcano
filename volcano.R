@@ -11,7 +11,6 @@ plotVolcano <- function(data,
                         de_vec,
                         show_logfc_thresh,
                         show_pvalue_thresh,
-                        thresh_color,
                         highlight_genes = NULL) {
   # check that columns exist
   if (!all(c(logfc_col, pval_col, gene_col) %in% colnames(data))) {

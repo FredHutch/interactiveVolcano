@@ -44,15 +44,11 @@ ui <- fluidPage(
   mainPanel(
     # tab bar on main panel
     tabsetPanel(
-                tabPanel("Splash page",
-                         h3("welcome to the carousel volcano plot app, 
-                           info about how this visualizaiton is created, where to find code, etc")), # end tabPanel
-                
                 # Volcano plot panel
                 tabPanel("Volcano Plot",
-                         h1("Interactive Volcano Plot"),
+                         h2("Interactive Volcano Plot"),
                          sidebarLayout(
-                           sidebarPanel(width = 3,
+                           sidebarPanel(width = 4,
                                         # SELECT AXES LABELS -----
                                         h4("Select volcano plot axes:"),
                                         # select column for pval
@@ -63,7 +59,7 @@ ui <- fluidPage(
                                         
                                         # select column for fold change
                                         selectInput("logfc_col",
-                                                    "Input column for log fold change (x axis)",
+                                                    "Input column for effect size (x axis)",
                                                     logfc_cols,
                                                     multiple = FALSE),
                                         
@@ -72,7 +68,7 @@ ui <- fluidPage(
                                         
                                         # set pvalue threshold 
                                         sliderInput("pvalue_threshold",
-                                                    "Select P value / FDR threshold",
+                                                    "Set P value / FDR threshold",
                                                     min = 0,
                                                     max = 1,
                                                     value = .05),
@@ -84,32 +80,16 @@ ui <- fluidPage(
                                         h4("Customize plot:"),
                                         # show/hide logfc and pval line
                                         checkboxInput("show_pvalue_threshold",
-                                                      "Show P value threshold?",
+                                                      "Show P value threshold line?",
                                                       value = TRUE),
                                         
                                         # show/hide logfc lines
                                         checkboxInput("show_logfc_threshold",
-                                                      "Show log fold change threshold?",
+                                                      "Show effect size threshold line?",
                                                       value = TRUE),
-                                        
-                                        # set threshold line color
-                                        textInput("threshold_color",
-                                                  "Choose threshold lines color",
-                                                  "red")),
+                                        ),
                            mainPanel(plotOutput("volcano_plot",
                                       click = "volcano_click"),
-                                     
-                                     # SELECT GENES OF INTEREST -----
-                                     h4("Highlight genes of interest:"),
-                                     
-                                     # select column for gene ID
-                                     selectInput("gene_col",
-                                                 "Select input column for gene ID",
-                                                 gene_cols,
-                                                 multiple = FALSE),
-                                     
-                                     # select genes to highlight
-                                     uiOutput("gene_selector"),
                                      
                                      # HIGHLIGHTED GENES TABLE -----
                                      dataTableOutput("gene_highlight_tbl"))
@@ -154,7 +134,7 @@ de_gene_data <- reactive({
   # min and max set reactively with logfc based on selected logfc input col
   output$logfc_slider <- renderUI({
     sliderInput("logfc_threshold",
-                "Select log fold change threshold",
+                "Select effect size threshold",
                 min = 0,
                 max = round(max(data[[input$logfc_col]])),
                 value = 2)
@@ -194,7 +174,6 @@ de_gene_data <- reactive({
                 de_vec = is_de(),
                 show_logfc_thresh = input$show_logfc_threshold,
                 show_pvalue_thresh = input$show_pvalue_threshold,
-                thresh_color = input$threshold_color,
                 highlight_genes = input$highlight_genes)
   })
   
