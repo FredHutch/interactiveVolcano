@@ -58,31 +58,43 @@ ui <- fluidPage(
                                                     "Select input column for P value",
                                                     pval_cols,
                                                     multiple = FALSE),
+                                        
                                         # select column for fold change
                                         selectInput("logfc_col",
                                                     "Select input column for fold change",
                                                     logfc_cols,
                                                     multiple = FALSE),
+                                        
                                         # select column for gene ID
                                         selectInput("gene_col",
                                                     "Select input column for gene ID",
                                                     gene_cols,
                                                     multiple = FALSE),
+                                        
                                         # set pvalue threshold 
                                         sliderInput("pvalue_threshold",
                                                     "Select P value / FDR threshold",
                                                     min = 0,
                                                     max = 1,
                                                     value = .05),
+                                        
                                         # set logfc threshold
                                         uiOutput("logfc_slider"),
-                                        # show/hide logfc and pval lines
+                                        
+                                        # show/hide logfc and pval line
                                         checkboxInput("show_pvalue_threshold",
                                                       "Show P value threshold?",
                                                       value = TRUE),
+                                        
+                                        # show/hide logfc lines
                                         checkboxInput("show_logfc_threshold",
                                                       "Show log fold change threshold?",
-                                                      value = TRUE)),
+                                                      value = TRUE),
+                                        
+                                        # set threshold line color
+                                        textInput("threshold_color",
+                                                  "Choose threshold lines color",
+                                                  "red")),
                                         # select genes to highlight
                                         #uiOutput("gene_selector")),
                          mainPanel(plotOutput("volcano_plot",
@@ -154,7 +166,8 @@ server <- function(input, output) {
                 logfc_thresh = input$logfc_threshold,
                 de_vec = is_de(),
                 show_logfc_thresh = input$show_logfc_threshold,
-                show_pvalue_thresh = input$show_pvalue_threshold)
+                show_pvalue_thresh = input$show_pvalue_threshold,
+                thresh_color = input$threshold_color)
                 
   })
   

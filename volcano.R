@@ -20,7 +20,8 @@ plotVolcano <- function(data,
                         logfc_thresh,
                         de_vec,
                         show_logfc_thresh,
-                        show_pvalue_thresh) {
+                        show_pvalue_thresh,
+                        thresh_color) {
   # check that columns exist
   if (!all(c(logfc_col, pval_col, gene_col) %in% colnames(data))) {
     stop("provided column names do not match dataset")
@@ -34,12 +35,12 @@ plotVolcano <- function(data,
   # if show_logfc_thresh = true add hline layer
   if (show_logfc_thresh) {
     volcano <- volcano + 
-      geom_hline(yintercept = -log10(pval_thresh), col = "red")
+      geom_hline(yintercept = -log10(pval_thresh), col = thresh_color)
   }
   # if show_pvalue_thresh = true add vline layer
   if (show_pvalue_thresh) {
     volcano <- volcano + 
-      geom_vline(xintercept = c(logfc_thresh, -logfc_thresh), col = "red")
+      geom_vline(xintercept = c(logfc_thresh, -logfc_thresh), col = thresh_color)
   }
   # add minimal theme
   volcanoPlot <- volcano + 
