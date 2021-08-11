@@ -3,7 +3,7 @@ library(shiny)
 library(tidyverse)
 library(plotly)
 
-# source scripts
+# source volcano plot script
 source("volcano.R")
 
 # read in data
@@ -53,23 +53,22 @@ ui <- fluidPage(
                          h1("Interactive Volcano Plot"),
                          sidebarLayout(
                            sidebarPanel(width = 3,
+                                        # SELECT AXES LABELS -----
+                                        h4("Select volcano plot axes:"),
                                         # select column for pval
                                         selectInput("pvalue_col",
-                                                    "Select input column for P value",
+                                                    "Input column for P-value (y axis)",
                                                     pval_cols,
                                                     multiple = FALSE),
                                         
                                         # select column for fold change
                                         selectInput("logfc_col",
-                                                    "Select input column for fold change",
+                                                    "Input column for log fold change (x axis)",
                                                     logfc_cols,
                                                     multiple = FALSE),
                                         
-                                        # select column for gene ID
-                                        selectInput("gene_col",
-                                                    "Select input column for gene ID",
-                                                    gene_cols,
-                                                    multiple = FALSE),
+                                        # SET PVAL AND LOGFC THRESHOLDS ----- 
+                                        h4("Set differential gene thresholds:"),
                                         
                                         # set pvalue threshold 
                                         sliderInput("pvalue_threshold",
@@ -81,6 +80,8 @@ ui <- fluidPage(
                                         # set logfc threshold
                                         uiOutput("logfc_slider"),
                                         
+                                        # CUSTOMIZE PLOT -----
+                                        h4("Customize plot:"),
                                         # show/hide logfc and pval line
                                         checkboxInput("show_pvalue_threshold",
                                                       "Show P value threshold?",
@@ -94,9 +95,19 @@ ui <- fluidPage(
                                         # set threshold line color
                                         textInput("threshold_color",
                                                   "Choose threshold lines color",
-                                                  "red")),
+                                                  "red"),
+                                        
+                                        # HIGHLIGHT GENES -----
+                                        h4("Highlight genes of interest:"),
+                                        
+                                        # select column for gene ID
+                                        selectInput("gene_col",
+                                                    "Select input column for gene ID",
+                                                    gene_cols,
+                                                    multiple = FALSE),
+                                        
                                         # select genes to highlight
-                                        #uiOutput("gene_selector")),
+                                        uiOutput("gene_selector")),
                          mainPanel(plotOutput("volcano_plot",
                                       click = "volcano_click"),
                                    verbatimTextOutput("info"))
@@ -124,7 +135,7 @@ server <- function(input, output) {
   })
   
   # reactively filter dataframe based on checkbox
-  filtered_gene_data <- reactive({
+de_gene_data <- reactive({
     if (input$show_de) {
       filter(data, is_de())
     } else {
@@ -134,7 +145,7 @@ server <- function(input, output) {
   
   # render data frame of gene data
   output$gene_data <- renderDataTable(
-    filtered_gene_data()
+  de_gene_data()
   )
   
   # render UI for logfc slider
@@ -147,13 +158,26 @@ server <- function(input, output) {
                 value = 2)
   })
   
-  # # gene
-  # output$gene_selector <- renderUI({
-  #   selectInput("selected_genes",
-  #               "Highlight gene(s)",
-  #               sort(data[[input$gene_col]]),
-  #               multiple = TRUE,
-  #               selectize= TRUE)
+  # select genes to highlight
+  output$gene_selector <- renderUI({
+    selectInput("highlight_genes",
+                "Highlight gene(s)",
+                sort(data[[input$gene_col]]),
+                multiple = TRUE,
+                selectize= TRUE)
+  })
+  
+  # highlight_gene_data <- reactive({
+  #   if (length(input$highlight_genes) > 0) {
+  #     highlight_gene_tbl <- data[data[[input$gene_col]] %in% hihglight_genes]
+  #   } else {
+  #     highlight_gene_tbl <- data.
+  #   }
+  # })
+  # 
+  # # render a datatable of selected genes info
+  # output$gene_highlight_tbl <- renderDataTable({
+  #   data[data$Genename %in% input$highlight_genes]
   # })
   
   # output volcano plot
@@ -167,7 +191,8 @@ server <- function(input, output) {
                 de_vec = is_de(),
                 show_logfc_thresh = input$show_logfc_threshold,
                 show_pvalue_thresh = input$show_pvalue_threshold,
-                thresh_color = input$threshold_color)
+                thresh_color = input$threshold_color,
+                highlight_genes = input$highlight_genes)
                 
   })
   
