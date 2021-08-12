@@ -114,12 +114,17 @@ ui <- fluidPage(
                               uiOutput("gene_selector")),
                  
                  # VOLCANO PLOT MAIN PANEL -----
-                 mainPanel(plotOutput("volcano_plot",
+                 mainPanel(
+                   # output info from click
+                   p("Hover over points to view gene label, effect size, and significance."),
+                   verbatimTextOutput("click_info",
+                                      placeholder = TRUE),
+                   
+                   # output ggplot volcano
+                   plotOutput("volcano_plot",
                                       width = "100%",
                                       height = "600px",
                                       hover = "volcano_hover"),
-                           
- #                          renderText("hover_point_info"),
                            
                            # Download button for plot
                            downloadButton('download_volcano', 'Download volcano plot as PDF'),
@@ -251,10 +256,24 @@ server <- function(input, output) {
     reactive_volcano()
   })
   
-  # hover over info
-  # output$hover_point_info <- renderText(
-  #   
-  # )
+  
+  reduced_data <- reactive({
+    # make new cols and select
+    reduced_data <- data %>%
+      mutate(log_pval = -log10(data[[input$pvalue_col]]))
+  })
+  
+   point_info <- reactive({
+     
+     nearpoint_out <- nearPoints(reduced_data(), input$volcano_hover, xvar = input$logfc_col, yvar = data$log_pval)
+     nearpoint_out %>%
+       select(input$gene_col, input$logfc_col, input$pvalue_col)
+   })
+  
+  output$click_info <- renderPrint({
+    point_info()
+  })
+
   
   output$download_volcano <- downloadHandler(
     filename = function() {
