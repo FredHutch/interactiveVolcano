@@ -9,6 +9,7 @@ plotVolcano <- function(data,
                         pval_thresh, 
                         logfc_thresh,
                         de_vec,
+                        color_by_de,
                         show_logfc_thresh,
                         show_pvalue_thresh,
                         highlight_genes = NULL) {
@@ -22,18 +23,26 @@ plotVolcano <- function(data,
                  log_pval = -log10(data[[pval_col]]))
   
   # build base of plot
-  volcano <- ggplot(data, aes(x = .data[[logfc_col]], y = log_pval)) +
-    geom_point(alpha = .6, aes(color = de_vec))
+  volcano <- ggplot(data, aes(x = .data[[logfc_col]], y = log_pval))
+  
+  # if show_devec is true color by DE genes
+  if (color_by_de) {
+    volcano <- volcano +
+      geom_point(alpha = .6, aes(color = de_vec))
+  } else {
+    volcano <- volcano +
+      geom_point(alpha = .6)
+  }
   
   # if show_logfc_thresh = true add hline layer
   if (show_logfc_thresh) {
     volcano <- volcano + 
-      geom_hline(yintercept = -log10(pval_thresh), col = thresh_color)
+      geom_hline(yintercept = -log10(pval_thresh), linetype = "dashed", col = "grey", size = 1)
   }
   # if show_pvalue_thresh = true add vline layer
   if (show_pvalue_thresh) {
     volcano <- volcano + 
-      geom_vline(xintercept = c(logfc_thresh, -logfc_thresh), col = thresh_color)
+      geom_vline(xintercept = c(logfc_thresh, -logfc_thresh), linetype = "dashed", col = "grey", size = 1)
   }
   
   # if highlight_genes isn't null, add to plot
@@ -41,7 +50,8 @@ plotVolcano <- function(data,
     # create vector of gene ids for label
     labels <- data[data[[gene_col]] %in% highlight_genes,]
     volcano <- suppressWarnings(volcano +
-        ggrepel::geom_label_repel(data = data[data[[gene_col]] %in% highlight_genes,], aes(label = labels[[gene_col]]))) 
+        ggrepel::geom_label_repel(data = data[data[[gene_col]] %in% highlight_genes,], 
+                                  aes(label = labels[[gene_col]]))) 
   }
   
   # add minimal theme
