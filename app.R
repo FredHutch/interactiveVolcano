@@ -96,15 +96,10 @@ ui <- fluidPage(
                                             "Color differentially expressed genes",
                                             TRUE),
                               
-                              # enter custom x (logfc) axis label
-                              textInput("x_axis_lab",
-                                        "Specify X axis label",
-                                        placeholder = "ex: Log Fold Change"),
+                              # output ui for text inputs
+                              uiOutput("x_axis_labeler"),
                               
-                              # enter cutsom y (pval) axis label
-                              textInput("y_axis_lab",
-                                        "Specify Y axis label",
-                                        placeholder = "ex: FDR"),
+                              uiOutput("y_axis_labeler"),
                               
                               # HIGHLIGHT GENES -----
                               h4("Highlight genes of interest:"),
@@ -121,7 +116,10 @@ ui <- fluidPage(
                  # VOLCANO PLOT MAIN PANEL -----
                  mainPanel(plotOutput("volcano_plot",
                                       width = "100%",
-                                      height = "600px"),
+                                      height = "600px",
+                                      hover = "volcano_hover"),
+                           
+ #                          renderText("hover_point_info"),
                            
                            # Download button for plot
                            downloadButton('download_volcano', 'Download volcano plot as PDF'),
@@ -211,6 +209,26 @@ server <- function(input, output) {
     highlight_gene_data()
   })
   
+  # enter custom x (logfc) axis label
+  output$x_axis_labeler <- renderUI({
+    textInput("x_axis_lab",
+              "Specify X axis label",
+              value = input$logfc_col,
+              placeholder = "ex: Log Fold Change")
+  })
+  
+  # capture pvalue column selected and create axis label with it
+  reactive_pvalue_value <- reactive({
+    paste0("-log10(", input$pvalue_col, ")")
+  })
+  # enter custom x (logfc) axis label
+  output$y_axis_labeler <- renderUI({
+    textInput("y_axis_lab",
+              "Specify Y axis label",
+              value = reactive_pvalue_value(),
+              placeholder = "ex: -log10(FDR)")
+  })
+  
   # volcano plot in reactive function (is this necessary?? can't be sure.)
   reactive_volcano <- reactive({
     plotVolcano(data = data, 
@@ -233,11 +251,16 @@ server <- function(input, output) {
     reactive_volcano()
   })
   
+  # hover over info
+  # output$hover_point_info <- renderText(
+  #   
+  # )
+  
   output$download_volcano <- downloadHandler(
     filename = function() {
       paste0("volcano-plot-", Sys.Date(), ".pdf")
     },
-    
+
     content = function(file) {
       ggsave(file, reactive_volcano(), device = "pdf", width = 10, height = 5, units = "in")
     })
