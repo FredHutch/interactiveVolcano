@@ -56,7 +56,7 @@ ui <- fluidPage(
                              
                               # select column for pval
                               selectInput("pvalue_col",
-                                          "Input column for P-value (y axis)",
+                                          "Input column for significance (y axis)",
                                           pval_cols,
                                           multiple = FALSE),
                                         
@@ -70,7 +70,7 @@ ui <- fluidPage(
                                         
                               # set pvalue threshold 
                               sliderInput("pvalue_threshold",
-                                          "Set P value / FDR threshold",
+                                          "Set significance threshold",
                                           min = 0,
                                           max = 1,
                                           value = .05),
@@ -78,17 +78,29 @@ ui <- fluidPage(
                               # set logfc threshold
                               uiOutput("logfc_slider"),
                               
+                              # HIGHLIGHT GENES -----
+                              h4("Highlight genes of interest:"),
+                              
+                              # select column for gene ID input
+                              selectInput("gene_col",
+                                          "Select input column for gene label",
+                                          gene_cols,
+                                          multiple = FALSE),
+                              
+                              # gene selector menu
+                              uiOutput("gene_selector"),
+                              
                               # CUSTOMIZE PLOT -----
                               h4("Customize plot:"),
                               
                               # show/hide logfc and pval line
                               checkboxInput("show_pvalue_threshold",
-                                            "Show P value threshold line?",
+                                            "Show significance threshold line",
                                             value = TRUE),
                               
                               # show/hide logfc lines
                               checkboxInput("show_logfc_threshold",
-                                            "Show effect size threshold line?",
+                                            "Show effect size threshold line",
                                             value = TRUE),
                               
                               # color differentially expressed genes
@@ -96,22 +108,14 @@ ui <- fluidPage(
                                             "Color differentially expressed genes",
                                             TRUE),
                               
-                              # output ui for text inputs
+                              # output ui for axis label inputs
+                              uiOutput("y_axis_labeler"),
                               uiOutput("x_axis_labeler"),
                               
-                              uiOutput("y_axis_labeler"),
-                              
-                              # HIGHLIGHT GENES -----
-                              h4("Highlight genes of interest:"),
-                              
-                              # select column for gene ID input
-                              selectInput("gene_col",
-                                          "Select input column for gene ID",
-                                          gene_cols,
-                                          multiple = FALSE),
-                              
-                              # gene selector menu
-                              uiOutput("gene_selector")),
+                              # label legend
+                              textInput("legend_title",
+                                        "Specify legend title",
+                                        value = "Differentially Expressed")),
                  
                  # VOLCANO PLOT MAIN PANEL -----
                  mainPanel(
@@ -140,11 +144,13 @@ ui <- fluidPage(
       
       # DATA PANEL -----
       tabPanel("Data",
-               h1("Provided dataset"),
                sidebarLayout(
                  
                  # DATA PANEL SIDEBAR
                  sidebarPanel(width = 3,
+                              
+                              # some text explanation
+                              p("Threshold for what is considered differentially expressed is set in Volcano Plot tab by using the significance and effect size sliders"),
                               
                               # Show differentiall expressed genes only
                               checkboxInput("show_de",
@@ -193,7 +199,7 @@ server <- function(input, output) {
   # select genes to highlight
   output$gene_selector <- renderUI({
     selectInput("highlight_genes",
-                "Highlight gene(s)",
+                "Select gene(s) to highlight",
                 sort(data[[input$gene_col]]),
                 multiple = TRUE,
                 selectize= TRUE)
@@ -248,7 +254,8 @@ server <- function(input, output) {
                 show_pvalue_thresh = input$show_pvalue_threshold,
                 highlight_genes = input$highlight_genes,
                 x_label = input$x_axis_lab,
-                y_label = input$y_axis_lab)
+                y_label = input$y_axis_lab,
+                legend_title = input$legend_title)
   })
 
   # output volcano plot
