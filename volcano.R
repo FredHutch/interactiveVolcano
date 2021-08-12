@@ -15,7 +15,8 @@ plotVolcano <- function(data,
                         show_pvalue_thresh,
                         highlight_genes = NULL,
                         x_label,
-                        y_label) {
+                        y_label,
+                        legend_title) {
   # check that columns exist
   if (!all(c(logfc_col, pval_col, gene_col) %in% colnames(data))) {
     stop("provided column names do not match dataset")
@@ -73,7 +74,7 @@ plotVolcano <- function(data,
   
   # add finishing touches to plot
   volcanoPlot <- volcano +
-    labs(x = axes$x, y = axes$y, color = "Differentially expressed") +
+    labs(x = axes$x, y = axes$y, color = legend_title) +
     theme_classic(base_size = 12)
   
   # display plot
