@@ -30,15 +30,6 @@ plotVolcano <- function(data,
   
   # create axes names
   axes <- NULL
-  # 
-  # axes$x <- ifelse(is.null(x_label),
-  #                  logfc_col,
-  #                  x_label)
-  # 
-  # axes$y <- ifelse(is.null(y_label),
-  #                  pval_col,
-  #                  y_label)
-  # 
   
   axes$x <- ifelse(x_label == "",
                    logfc_col,
