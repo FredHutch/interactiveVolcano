@@ -40,72 +40,90 @@ gene_cols <- names(data)[sapply(names(data), gene_candidate_f)]
 
 # ui -----------------------------
 ui <- fluidPage(
-  # main panel
-  mainPanel(
     # tab bar on main panel
     tabsetPanel(
-                # Volcano plot panel
-                tabPanel("Volcano Plot",
-                         h2("Interactive Volcano Plot"),
-                         sidebarLayout(
-                           sidebarPanel(width = 4,
-                                        # SELECT AXES LABELS -----
-                                        h4("Select volcano plot axes:"),
-                                        # select column for pval
-                                        selectInput("pvalue_col",
-                                                    "Input column for P-value (y axis)",
-                                                    pval_cols,
-                                                    multiple = FALSE),
+      # VOLCANO PLOT PANEL -----
+      tabPanel("Volcano Plot",
+               h2("Interactive Volcano Plot"),
+               sidebarLayout(
+                 
+                 # VOLCANO PLOT SIDE PANEL ------
+                 sidebarPanel(width = 4,
+                              
+                              # SELECT AXES LABELS -----
+                              h4("Select volcano plot axes:"),
+                             
+                              # select column for pval
+                              selectInput("pvalue_col",
+                                          "Input column for P-value (y axis)",
+                                          pval_cols,
+                                          multiple = FALSE),
                                         
-                                        # select column for fold change
-                                        selectInput("logfc_col",
-                                                    "Input column for effect size (x axis)",
-                                                    logfc_cols,
-                                                    multiple = FALSE),
+                              # select column for fold change
+                              selectInput("logfc_col",
+                                          "Input column for effect size (x axis)",
+                                          logfc_cols,
+                                          multiple = FALSE),
+                              # SET PVAL AND LOGFC THRESHOLDS ----- 
+                              h4("Set differential gene thresholds:"),
                                         
-                                        # SET PVAL AND LOGFC THRESHOLDS ----- 
-                                        h4("Set differential gene thresholds:"),
-                                        
-                                        # set pvalue threshold 
-                                        sliderInput("pvalue_threshold",
-                                                    "Set P value / FDR threshold",
-                                                    min = 0,
-                                                    max = 1,
-                                                    value = .05),
-                                        
-                                        # set logfc threshold
-                                        uiOutput("logfc_slider"),
-                                        
-                                        # CUSTOMIZE PLOT -----
-                                        h4("Customize plot:"),
-                                        # show/hide logfc and pval line
-                                        checkboxInput("show_pvalue_threshold",
-                                                      "Show P value threshold line?",
-                                                      value = TRUE),
-                                        
-                                        # show/hide logfc lines
-                                        checkboxInput("show_logfc_threshold",
-                                                      "Show effect size threshold line?",
-                                                      value = TRUE),
-                                        ),
-                           mainPanel(plotOutput("volcano_plot",
+                              # set pvalue threshold 
+                              sliderInput("pvalue_threshold",
+                                          "Set P value / FDR threshold",
+                                          min = 0,
+                                          max = 1,
+                                          value = .05),
+                              
+                              # set logfc threshold
+                              uiOutput("logfc_slider"),
+                              
+                              # CUSTOMIZE PLOT -----
+                              h4("Customize plot:"),
+                              
+                              # show/hide logfc and pval line
+                              checkboxInput("show_pvalue_threshold",
+                                            "Show P value threshold line?",
+                                            value = TRUE),
+                              
+                              # show/hide logfc lines
+                              checkboxInput("show_logfc_threshold",
+                                            "Show effect size threshold line?",
+                                            value = TRUE),
+                              
+                              # color differentially expressed genes
+                              checkboxInput("color_by_de",
+                                            "Color differentially expressed genes",
+                                            TRUE)),
+                 
+                 # VOLCANO PLOT MAIN PANEL -----
+                 mainPanel(plotOutput("volcano_plot",
+                                      width = "100%",
+                                      height = "600px",
                                       click = "volcano_click"),
-                                     
-                                     # HIGHLIGHTED GENES TABLE -----
-                                     dataTableOutput("gene_highlight_tbl"))
-                         ) # end sidebarLayout
-                         ), # end tabPanel
-                # Data panel
-                tabPanel("Data",
-                         h1("Provided dataset"),
-                         sidebarLayout(
-                           sidebarPanel(width = 3,
-                                        checkboxInput("show_de",
-                                                       "Show only differentially expressed genes",
-                                                       FALSE)),
-                           mainPanel(dataTableOutput("gene_data"))))
+                           
+                           # HIGHLIGHTED GENES TABLE -----
+                           dataTableOutput("gene_highlight_tbl"))
+                 
+                 ) # end sidebarLayout
+               ), # end volcano plot tabPanel
+      
+      # DATA PANEL -----
+      tabPanel("Data",
+               h1("Provided dataset"),
+               sidebarLayout(
+                 
+                 # DATA PANEL SIDEBAR
+                 sidebarPanel(width = 4,
+                              
+                              # Show differentiall expressed genes only
+                              checkboxInput("show_de",
+                                            "Show only differentially expressed genes",
+                                            FALSE)),
+                 
+                 # DATA PANEL MAIN PANEL
+                 mainPanel(dataTableOutput("gene_data")))
+               ) # end data tab panel
                 ) # end tabsetPanel
-    ) # end mainPanel
 ) # end fluidPage
 
 # server -------------------------
@@ -172,6 +190,7 @@ de_gene_data <- reactive({
                 pval_thresh = input$pvalue_threshold,
                 logfc_thresh = input$logfc_threshold,
                 de_vec = is_de(),
+                color_by_de = input$color_by_de,
                 show_logfc_thresh = input$show_logfc_threshold,
                 show_pvalue_thresh = input$show_pvalue_threshold,
                 highlight_genes = input$highlight_genes)
