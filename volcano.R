@@ -1,6 +1,7 @@
-## NOTES ##
-# - hardcoding is.DE for now because it is already generated. Working version will take
-#   p value and lfc considered significant as an argument and create is.DE column.
+##################################
+# REACTIVE VOLCANO PLOT FUNCTION #
+##################################
+
 
 plotVolcano <- function(data, 
                         logfc_col, 
@@ -12,7 +13,9 @@ plotVolcano <- function(data,
                         color_by_de,
                         show_logfc_thresh,
                         show_pvalue_thresh,
-                        highlight_genes = NULL) {
+                        highlight_genes = NULL,
+                        x_label,
+                        y_label) {
   # check that columns exist
   if (!all(c(logfc_col, pval_col, gene_col) %in% colnames(data))) {
     stop("provided column names do not match dataset")
@@ -21,6 +24,31 @@ plotVolcano <- function(data,
   # convert pval to -log10(pval)
   data <- mutate(data,
                  log_pval = -log10(data[[pval_col]]))
+  
+  # Reorder de_vec factors so that TRUE is first
+  de_vec <- factor(de_vec, levels=c("TRUE", "FALSE"))
+  
+  # create axes names
+  axes <- NULL
+  # 
+  # axes$x <- ifelse(is.null(x_label),
+  #                  logfc_col,
+  #                  x_label)
+  # 
+  # axes$y <- ifelse(is.null(y_label),
+  #                  pval_col,
+  #                  y_label)
+  # 
+  
+  axes$x <- ifelse(x_label == "",
+                   logfc_col,
+                   x_label)
+  axes$y <- ifelse(y_label == "",
+                   pval_col,
+                   y_label)
+  
+  # update y axis lab to include -log10
+  axes$y <- paste0("-log10(", axes$y, ")")
   
   # build base of plot
   volcano <- ggplot(data, aes(x = .data[[logfc_col]], y = log_pval))
@@ -54,9 +82,10 @@ plotVolcano <- function(data,
                                   aes(label = labels[[gene_col]]))) 
   }
   
-  # add minimal theme
-  volcanoPlot <- volcano + 
-    theme_minimal()
+  # add finishing touches to plot
+  volcanoPlot <- volcano +
+    labs(x = axes$x, y = axes$y, color = "Differentially expressed") +
+    theme_classic(base_size = 15)
   
   # display plot
   volcanoPlot
