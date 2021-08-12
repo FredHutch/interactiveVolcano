@@ -93,13 +93,40 @@ ui <- fluidPage(
                               # color differentially expressed genes
                               checkboxInput("color_by_de",
                                             "Color differentially expressed genes",
-                                            TRUE)),
+                                            TRUE),
+                              
+                              # enter custom x (logfc) axis label
+                              textInput("x_axis_lab",
+                                        "Specify X axis label",
+                                        placeholder = "ex: Log Fold Change"),
+                              
+                              # enter cutsom y (pval) axis label
+                              textInput("y_axis_lab",
+                                        "Specify Y axis label",
+                                        placeholder = "ex: FDR"),
+                              
+                              # HIGHLIGHT GENES -----
+                              h4("Highlight genes of interest:"),
+                              
+                              # select column for gene ID input
+                              selectInput("gene_col",
+                                          "Select input column for gene ID",
+                                          gene_cols,
+                                          multiple = FALSE),
+                              
+                              # gene selector menu
+                              uiOutput("gene_selector")),
                  
                  # VOLCANO PLOT MAIN PANEL -----
                  mainPanel(plotOutput("volcano_plot",
                                       width = "100%",
-                                      height = "600px",
-                                      click = "volcano_click"),
+                                      height = "600px"),
+                           
+                           # Download button for plot
+                           downloadButton('download_volcano', 'Download volcano plot as PDF'),
+                           
+                           br(),
+                           br(),
                            
                            # HIGHLIGHTED GENES TABLE -----
                            dataTableOutput("gene_highlight_tbl"))
@@ -113,7 +140,7 @@ ui <- fluidPage(
                sidebarLayout(
                  
                  # DATA PANEL SIDEBAR
-                 sidebarPanel(width = 4,
+                 sidebarPanel(width = 3,
                               
                               # Show differentiall expressed genes only
                               checkboxInput("show_de",
@@ -135,7 +162,7 @@ server <- function(input, output) {
   })
   
   # reactively filter dataframe based on checkbox
-de_gene_data <- reactive({
+  de_gene_data <- reactive({
     if (input$show_de) {
       filter(data, is_de())
     } else {
@@ -155,7 +182,8 @@ de_gene_data <- reactive({
                 "Select effect size threshold",
                 min = 0,
                 max = round(max(data[[input$logfc_col]])),
-                value = 2)
+                value = 2,
+                step = .5)
   })
   
   # select genes to highlight
@@ -167,6 +195,7 @@ de_gene_data <- reactive({
                 selectize= TRUE)
   })
   
+  # reactive function that subsets data by highlighted_gene vector
   highlight_gene_data <- reactive({
     if (length(input$highlight_genes) > 0) {
       highlight_gene_data <- data[data[[input$gene_col]] %in% input$highlight_genes, c(input$gene_col, input$logfc_col, input$pvalue_col)]
@@ -176,13 +205,13 @@ de_gene_data <- reactive({
     }
   })
 
-  # render a datatable of selected genes info
+  # render a data table of highlighted genes info
   output$gene_highlight_tbl <- renderDataTable({
     highlight_gene_data()
   })
   
-  # output volcano plot
-  output$volcano_plot <- renderPlot({
+  # volcano plot in reactive function (is this necessary?? can't be sure.)
+  reactive_volcano <- reactive({
     plotVolcano(data = data, 
                 logfc_col = input$logfc_col, 
                 pval_col = input$pvalue_col,
@@ -193,13 +222,23 @@ de_gene_data <- reactive({
                 color_by_de = input$color_by_de,
                 show_logfc_thresh = input$show_logfc_threshold,
                 show_pvalue_thresh = input$show_pvalue_threshold,
-                highlight_genes = input$highlight_genes)
+                highlight_genes = input$highlight_genes,
+                x_label = input$x_axis_lab,
+                y_label = input$y_axis_lab)
+  })
+
+  # output volcano plot
+  output$volcano_plot <- renderPlot({
+    reactive_volcano()
   })
   
-  # output volcano_click info as text  
-  output$info <- renderText({
-    paste0(input$volcano_click)
-    })
+  # output$download_volcano <- downloadHandler(
+  #   filename = function() {
+  #     paste0("volcano-plot-", Sys.Date(), ".png")
+  #   }
+  #   content = function(file){
+  #     ggsave(file,plot=data$plot)
+  #   })
 }
 
 # build app ----------------------
