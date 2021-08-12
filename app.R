@@ -1,3 +1,4 @@
+# set up -----------------------------
 # load libraries
 library(shiny)
 library(tidyverse)
@@ -232,13 +233,14 @@ server <- function(input, output) {
     reactive_volcano()
   })
   
-  # output$download_volcano <- downloadHandler(
-  #   filename = function() {
-  #     paste0("volcano-plot-", Sys.Date(), ".png")
-  #   }
-  #   content = function(file){
-  #     ggsave(file,plot=data$plot)
-  #   })
+  output$download_volcano <- downloadHandler(
+    filename = function() {
+      paste0("volcano-plot-", Sys.Date(), ".pdf")
+    },
+    
+    content = function(file) {
+      ggsave(file, reactive_volcano(), device = "pdf", width = 10, height = 5, units = "in")
+    })
 }
 
 # build app ----------------------

@@ -85,7 +85,7 @@ plotVolcano <- function(data,
   # add finishing touches to plot
   volcanoPlot <- volcano +
     labs(x = axes$x, y = axes$y, color = "Differentially expressed") +
-    theme_classic(base_size = 15)
+    theme_classic(base_size = 12)
   
   # display plot
   volcanoPlot
