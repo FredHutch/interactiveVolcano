@@ -44,11 +44,8 @@ plotVolcano <- function(data,
                    logfc_col,
                    x_label)
   axes$y <- ifelse(y_label == "",
-                   pval_col,
+                   paste0("-log10(", pval_col, ")"),
                    y_label)
-  
-  # update y axis lab to include -log10
-  axes$y <- paste0("-log10(", axes$y, ")")
   
   # build base of plot
   volcano <- ggplot(data, aes(x = .data[[logfc_col]], y = log_pval))
@@ -61,14 +58,15 @@ plotVolcano <- function(data,
     volcano <- volcano +
       geom_point(alpha = .6)
   }
-  
-  # if show_logfc_thresh = true add hline layer
-  if (show_logfc_thresh) {
+
+  # if show_pvalue_thresh = true add vline layer
+  if (show_pvalue_thresh) {
     volcano <- volcano + 
       geom_hline(yintercept = -log10(pval_thresh), linetype = "dashed", col = "grey", size = 1)
   }
-  # if show_pvalue_thresh = true add vline layer
-  if (show_pvalue_thresh) {
+  
+  # if show_logfc_thresh = true add hline layer
+  if (show_logfc_thresh) {
     volcano <- volcano + 
       geom_vline(xintercept = c(logfc_thresh, -logfc_thresh), linetype = "dashed", col = "grey", size = 1)
   }
