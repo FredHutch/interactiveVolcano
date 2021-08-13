@@ -150,7 +150,8 @@ ui <- fluidPage(
                  sidebarPanel(width = 3,
                               
                               # some text explanation
-                              p("Threshold for what is considered differentially expressed is set in Volcano Plot tab by using the significance and effect size sliders"),
+                              em("Threshold for what is considered differentially expressed is set in Volcano Plot tab by using 
+                                 the significance and effect size sliders"),
                               
                               # Show differentiall expressed genes only
                               checkboxInput("show_de",
@@ -166,24 +167,7 @@ ui <- fluidPage(
 # server -------------------------
 server <- function(input, output) {
   
-  # reactively mark DE genes from using pval and logfc
-  is_de <- reactive({
-    abs(data[[input$logfc_col]]) >= input$logfc_threshold & data[[input$pvalue_col]] <= input$pvalue_threshold
-  })
-  
-  # reactively filter dataframe based on checkbox
-  de_gene_data <- reactive({
-    if (input$show_de) {
-      filter(data, is_de())
-    } else {
-      data
-    }
-  })
-  
-  # render data frame of gene data
-  output$gene_data <- renderDataTable(
-  de_gene_data()
-  )
+  # IDENTIFY DIFFERENTIALLY EXPRESSED GENES -----
   
   # render UI for logfc slider
   # min and max set reactively with logfc based on selected logfc input col
@@ -196,6 +180,53 @@ server <- function(input, output) {
                 step = .5)
   })
   
+  # use columns and thresholds selected in UI
+  is_de <- reactive({
+    abs(data[[input$logfc_col]]) >= input$logfc_threshold & data[[input$pvalue_col]] <= input$pvalue_threshold
+  })
+  
+  
+  # FILTERABLE DATAFRAME BY DE GENE -----
+  
+  # reactively filter data based on checkbox
+  de_gene_data <- reactive({
+    if (input$show_de) {
+      filter(data, is_de())
+    } else {
+      data
+    }
+  })
+  
+  # render data frame of gene data
+  output$gene_data <- renderDataTable(
+    de_gene_data()
+  )
+  
+  # X AND Y AXES LABELER -----
+  
+  # capture pvalue column selected and default value with it
+  reactive_pvalue_value <- reactive({
+    paste0("-log10(", input$pvalue_col, ")")
+  })
+  
+  # enter custom x (logfc) axis label
+  output$x_axis_labeler <- renderUI({
+    textInput("x_axis_lab",
+              "Specify X axis label",
+              value = input$logfc_col,
+              placeholder = "ex: Log Fold Change")
+  })
+    
+    # enter custom x (logfc) axis label
+    output$y_axis_labeler <- renderUI({
+      textInput("y_axis_lab",
+                "Specify Y axis label",
+                value = reactive_pvalue_value(),
+                placeholder = "ex: -log10(FDR)")
+    })
+  
+  # HIGHLIGHTED GENE TABLE -----
+
   # select genes to highlight
   output$gene_selector <- renderUI({
     selectInput("highlight_genes",
@@ -220,25 +251,7 @@ server <- function(input, output) {
     highlight_gene_data()
   })
   
-  # enter custom x (logfc) axis label
-  output$x_axis_labeler <- renderUI({
-    textInput("x_axis_lab",
-              "Specify X axis label",
-              value = input$logfc_col,
-              placeholder = "ex: Log Fold Change")
-  })
-  
-  # capture pvalue column selected and create axis label with it
-  reactive_pvalue_value <- reactive({
-    paste0("-log10(", input$pvalue_col, ")")
-  })
-  # enter custom x (logfc) axis label
-  output$y_axis_labeler <- renderUI({
-    textInput("y_axis_lab",
-              "Specify Y axis label",
-              value = reactive_pvalue_value(),
-              placeholder = "ex: -log10(FDR)")
-  })
+  # PLOT AND RENDER VOLCANO -----
   
   # volcano plot in reactive function (is this necessary?? can't be sure.)
   reactive_volcano <- reactive({
@@ -263,24 +276,28 @@ server <- function(input, output) {
     reactive_volcano()
   })
   
+  # DISPLAY GENE INFO ON HOVER OVER -----
   
-  reduced_data <- reactive({
+  # Create -log10 pvalue column
+  data_w_log_pval <- reactive({
     # make new cols and select
     reduced_data <- data %>%
       mutate(log_pval = -log10(data[[input$pvalue_col]]))
   })
   
-   point_info <- reactive({
-     
-     nearpoint_out <- nearPoints(reduced_data(), input$volcano_hover, xvar = input$logfc_col, yvar = data$log_pval)
+  # Collect nearpoint info and reduce to only gene_col, logfc_col and pvalue_col
+  point_info <- reactive({
+     nearpoint_out <- nearPoints(data_w_log_pval(), input$volcano_hover, xvar = input$logfc_col, yvar = data$log_pval)
      nearpoint_out %>%
        select(input$gene_col, input$logfc_col, input$pvalue_col)
    })
   
+  # render printed text
   output$click_info <- renderPrint({
     point_info()
   })
 
+  # DOWNLOAD HANDLER -----
   
   output$download_volcano <- downloadHandler(
     filename = function() {
