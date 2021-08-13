@@ -1,8 +1,6 @@
 ##################################
 # REACTIVE VOLCANO PLOT FUNCTION #
 ##################################
-
-
 plotVolcano <- function(data, 
                         logfc_col, 
                         pval_col, 
@@ -31,7 +29,6 @@ plotVolcano <- function(data,
   
   # create axes names
   axes <- NULL
-  
   axes$x <- ifelse(x_label == "",
                    logfc_col,
                    x_label)
