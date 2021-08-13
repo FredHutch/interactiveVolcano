@@ -2,19 +2,35 @@
 # load libraries
 library(shiny)
 library(tidyverse)
-library(plotly)
+library(data.table)
 
 # source volcano plot script
 source("volcano.R")
 
-# read in data
-data <- read.table("210709_KO_vs_WT.txt", sep = "\t", header = T)
+# look for data file
+tsv <- list.files(".", pattern = ".tsv", full.names = TRUE)
+csv <- list.files(".", pattern = ".csv", full.names = TRUE)
+txt <- list.files(".", pattern = ".txt", full.names = TRUE)
+
+if(length(tsv) > 0) {
+  data <- read.table(txt, header = TRUE, sep = "\t")
+}
+
+if(length(csv) > 0) {
+  data <- read.table(csv, header = TRUE, sep = ",")
+}
+
+if(length(txt) > 0) {
+  data <- data.table::fread(txt)
+}
+
+data <- as.data.frame(data)
 
 # functions
 pvalue_candidate_f <- function(x) {
   if (class(data[[x]]) == "numeric") {
-    if (max(data[[x]]) <= 1) {
-      if (min(data[[x]]) >= 0) {
+    if (max(data[[x]], na.rm = TRUE) <= 1) {
+      if (min(data[[x]], na.rm = TRUE) >= 0) {
         return(TRUE)
       }
     }
