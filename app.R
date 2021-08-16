@@ -5,12 +5,12 @@ library(tidyverse)
 library(data.table)
 
 # source volcano plot script
-source("volcano.R")
+source("/apps/volcano/volcano.R")
 
 # look for data file
-tsv <- list.files(".", pattern = ".tsv", full.names = TRUE)
-csv <- list.files(".", pattern = ".csv", full.names = TRUE)
-txt <- list.files(".", pattern = ".txt", full.names = TRUE)
+tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
+csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
+txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
 
 if(length(tsv) > 0) {
   data <- read.table(txt, header = TRUE, sep = "\t")
@@ -21,10 +21,8 @@ if(length(csv) > 0) {
 }
 
 if(length(txt) > 0) {
-  data <- data.table::fread(txt)
+  data <- fread(txt)
 }
-
-data <- as.data.frame(data)
 
 # functions
 pvalue_candidate_f <- function(x) {
