@@ -24,6 +24,8 @@ if(length(txt) > 0) {
   data <- fread(txt)
 }
 
+data <- as.data.frame(data)
+
 # functions
 pvalue_candidate_f <- function(x) {
   if (class(data[[x]]) == "numeric") {
