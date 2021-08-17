@@ -82,7 +82,7 @@ ui <- fluidPage(
                                           logfc_cols,
                                           multiple = FALSE),
                               # SET PVAL AND LOGFC THRESHOLDS ----- 
-                              h4("Set differential gene thresholds:"),
+                              h4("Set significance and effect size thresholds:"),
                                         
                               # set pvalue threshold 
                               sliderInput("pvalue_threshold",
@@ -95,11 +95,11 @@ ui <- fluidPage(
                               uiOutput("logfc_slider"),
                               
                               # HIGHLIGHT GENES -----
-                              h4("Highlight genes of interest:"),
+                              h4("Highlight features of interest:"),
                               
                               # select column for gene ID input
                               selectInput("gene_col",
-                                          "Select input column for gene label",
+                                          "Select input column for feature label",
                                           gene_cols,
                                           multiple = FALSE),
                               
@@ -121,7 +121,7 @@ ui <- fluidPage(
                               
                               # color differentially expressed genes
                               checkboxInput("color_by_de",
-                                            "Color differentially expressed genes",
+                                            "Color significantly different features",
                                             TRUE),
                               
                               # output ui for axis label inputs
@@ -136,7 +136,7 @@ ui <- fluidPage(
                  # VOLCANO PLOT MAIN PANEL -----
                  mainPanel(
                    # output info from click
-                   p("Hover over points to view gene label, effect size, and significance."),
+                   p("Hover over points to view features label, effect size, and significance."),
                    verbatimTextOutput("click_info",
                                       placeholder = TRUE),
                    
@@ -171,7 +171,7 @@ ui <- fluidPage(
                               
                               # Show differentiall expressed genes only
                               checkboxInput("show_de",
-                                            "Show only differentially expressed genes",
+                                            "Show only significantly different features",
                                             FALSE)),
                  
                  # DATA PANEL MAIN PANEL
@@ -246,7 +246,7 @@ server <- function(input, output) {
   # select genes to highlight
   output$gene_selector <- renderUI({
     selectInput("highlight_genes",
-                "Select gene(s) to highlight",
+                "Select feature(s) to highlight",
                 sort(data[[input$gene_col]]),
                 multiple = TRUE,
                 selectize= TRUE)
