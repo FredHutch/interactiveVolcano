@@ -6,7 +6,7 @@ An interactive shiny app for creating and editing volcano plots. A volcano plot 
 
 This shiny app takes a single file input. It is a dataframe with at least three columns: gene ID, significance value, and effect size. The dataframe shoudl be saved as either a `.csv`, `.tsv`, or `.txt`. 
 
-To run the application, clone this repository and place your data file within the repository. Open app.R in RStudio and click Run App.
+To run the application, clone this repository. Open app.R in your text editor of choice. Edit lines 8 - 13 by modifying the paths to match your local environment.
 
 ### Usage
 
