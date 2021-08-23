@@ -2,13 +2,49 @@
 
 An interactive shiny app for creating and editing volcano plots. A volcano plot is a type of scatter plot represents differential expression of features (genes for example): on the x-axis we typically find the fold change and on the y-axis the p-value.
 
-### Run 
+The `master` branch is set up to run in a specific docker environement.
 
-This shiny app takes a single file input. It is a dataframe with at least three columns: gene ID, significance value, and effect size. The dataframe shoudl be saved as either a `.csv`, `.tsv`, or `.txt`. 
+To run locally use the `local` branch. Replace the example dataset in the `data` directory with your dataset in to run the application with your own data.
 
-To run the application, clone this repository. Open app.R in your text editor of choice. Edit lines 8 - 13 by modifying the paths to match your local environment.
+### Set up
 
-### Usage
+The easiest way to install this application is to clone it from this GitHub. Open the command line (terminal on Mac) and type the following commands:
+
+Go to the directory that you want to download the app to.
+```
+cd <PATH/TO/DIR>
+```
+
+Clone this repository
+```
+git clone https://github.com/FredHutch/interactiveVolcano.git
+```
+
+Enter the repository and switch to the local branch
+```
+cd interactiveVolcano
+git checkout local
+```
+
+### Adding your data 
+
+This shiny app takes a single file input. It is a dataframe with at least three columns: gene ID, significance value, and effect size. The dataframe shoudl be saved as either a `.csv`, `.tsv`, or `.txt`.
+
+If running locally replace the example dataset in `interactiveVolcano/data` with your dataset.
+
+### Running the app
+
+Run the app from RStudio:
+
+1. Open `app.R`.
+2. Click `Run App` in the top right hand corner.
+
+Run from the command line:
+
+1. Navigate to the `interactiveVolcano` directory
+2. `R -e "shiny::runApp('./')"`
+
+### Application features
 
 Once running the application opens to a tab with your volcano plot. Hover over the plot points to view geneID and other metrics.
 
