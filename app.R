@@ -13,7 +13,7 @@ csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
 txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
 
 if(length(tsv) > 0) {
-  data <- read.table(txt, header = TRUE, sep = "\t")
+  data <- read.table(tsv, header = TRUE, sep = "\t")
 }
 
 if(length(csv) > 0) {
