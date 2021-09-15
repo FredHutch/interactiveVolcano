@@ -5,12 +5,20 @@ library(tidyverse)
 library(data.table)
 
 # source volcano plot script
-source("/apps/volcano/volcano.R")
+# source("/apps/volcano/volcano.R")
+# source("/apps/volcano/click.R")
+
+source("volcano.R")
+source("click.R")
 
 # look for data file
-tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
-csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
-txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
+# tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
+# csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
+# txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
+
+tsv <- list.files("data/", pattern = ".tsv", full.names = TRUE)
+csv <- list.files("data/", pattern = ".csv", full.names = TRUE)
+txt <- list.files("data/", pattern = ".txt", full.names = TRUE)
 
 if(length(tsv) > 0) {
   data <- read.table(txt, header = TRUE, sep = "\t")
@@ -142,9 +150,10 @@ ui <- fluidPage(
                    
                    # output ggplot volcano
                    plotOutput("volcano_plot",
-                                      width = "100%",
-                                      height = "600px",
-                                      hover = "volcano_hover"),
+                              width = "100%",
+                              height = "600px",
+                              hover = "volcano_hover",
+                              click = "volcano_click"),
                            
                            # Download button for plot
                            downloadButton('download_volcano', 'Download volcano plot as PDF'),
@@ -245,17 +254,49 @@ server <- function(input, output) {
 
   # select genes to highlight
   output$gene_selector <- renderUI({
-    selectInput("highlight_genes",
+    selectInput("selected_genes",
                 "Select feature(s) to highlight",
                 sort(data[[input$gene_col]]),
                 multiple = TRUE,
-                selectize= TRUE)
+                selectize= TRUE,
+                selected = gene_list$clicked_gene_list)
   })
-  
+    
+    gene_list <- reactiveValues(clicked_gene_list = NULL)
+    
+    clicked_gene <- reactive({
+      nearPoints(data_w_log_pval(),
+                 input$volcano_click,
+                 xvar = input$logfc_col,
+                 yvar = .data$log_pval) %>%
+        select(input$gene_col)
+      })
+    
+    observeEvent(input$volcano_click, {
+      # if gene_list is empty
+      # get point info and save gene
+      if (is.null(gene_list$clicked_gene_list)) {
+        gene_list$clicked_gene_list <- clicked_gene()
+        # if gene_list is not NULL
+        # check to see if gene is in gene_list
+      } else {
+        gene_present <- clicked_gene() %in% gene_list$clicked_gene_list
+        # if TRUE (gene is present already)
+        # remove gene from gene list
+        if (gene_present) {
+          present_idx <- !grepl(clicked_gene(), gene_list$clicked_gene_list)
+          # remove row
+          gene_list$clicked_gene_list <- gene_list$clicked_gene_list[present_idx]
+        } else {
+          gene_list$clicked_gene_list <- c(clicked_gene(), gene_list$clicked_gene_list)
+        }
+      }
+    })
+
   # reactive function that subsets data by highlighted_gene vector
   highlight_gene_data <- reactive({
-    if (length(input$highlight_genes) > 0) {
-      highlight_gene_data <- data[data[[input$gene_col]] %in% input$highlight_genes, c(input$gene_col, input$logfc_col, input$pvalue_col)]
+    if (length(input$selected_genes) > 0) {
+      highlight_gene_data <- data[data[[input$gene_col]] %in% input$selected_genes, c(input$gene_col, input$logfc_col, input$pvalue_col)]
     } else {
       highlight_gene_data <- data.frame(NA, NA, NA)
       names(highlight_gene_data) <- c(input$gene_col, input$logfc_col, input$pvalue_col)
@@ -281,7 +322,7 @@ server <- function(input, output) {
                 color_by_de = input$color_by_de,
                 show_logfc_thresh = input$show_logfc_threshold,
                 show_pvalue_thresh = input$show_pvalue_threshold,
-                highlight_genes = input$highlight_genes,
+                highlight_genes = input$selected_genes,
                 x_label = input$x_axis_lab,
                 y_label = input$y_axis_lab,
                 legend_title = input$legend_title)
@@ -303,7 +344,7 @@ server <- function(input, output) {
   
   # Collect nearpoint info and reduce to only gene_col, logfc_col and pvalue_col
   point_info <- reactive({
-     nearpoint_out <- nearPoints(data_w_log_pval(), input$volcano_hover, xvar = input$logfc_col, yvar = data$log_pval)
+     nearpoint_out <- nearPoints(data_w_log_pval(), input$volcano_hover, xvar = input$logfc_col, yvar = .data$log_pval)
      nearpoint_out %>%
        select(input$gene_col, input$logfc_col, input$pvalue_col)
    })
