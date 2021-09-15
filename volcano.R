@@ -14,7 +14,9 @@ plotVolcano <- function(data,
                         highlight_genes = NULL,
                         x_label,
                         y_label,
-                        legend_title) {
+                        legend_title,
+                        xlim,
+                        ylim) {
   # check that columns exist
   if (!all(c(logfc_col, pval_col, gene_col) %in% colnames(data))) {
     stop("provided column names do not match dataset")
@@ -46,6 +48,10 @@ plotVolcano <- function(data,
   } else {
     volcano <- volcano +
       geom_point(alpha = .6)
+  }
+  
+  if (any(!is.null(c(xlim, ylim)))) {
+    volcano <- volcano + coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)
   }
 
   # if show_pvalue_thresh = true add vline layer

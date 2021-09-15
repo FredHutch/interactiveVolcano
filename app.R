@@ -9,7 +9,6 @@ library(data.table)
 # source("/apps/volcano/click.R")
 
 source("volcano.R")
-source("click.R")
 
 # look for data file
 # tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
@@ -21,7 +20,7 @@ csv <- list.files("data/", pattern = ".csv", full.names = TRUE)
 txt <- list.files("data/", pattern = ".txt", full.names = TRUE)
 
 if(length(tsv) > 0) {
-  data <- read.table(txt, header = TRUE, sep = "\t")
+  data <- read.table(tsv, header = TRUE, sep = "\t")
 }
 
 if(length(csv) > 0) {
@@ -153,7 +152,11 @@ ui <- fluidPage(
                               width = "100%",
                               height = "600px",
                               hover = "volcano_hover",
-                              click = "volcano_click"),
+                              click = "volcano_click",
+                              dblclick = "volcano_dbl_click",
+                              brush = brushOpts(
+                                id = "volcano_brush",
+                                resetOnNew = TRUE)),
                            
                            # Download button for plot
                            downloadButton('download_volcano', 'Download volcano plot as PDF'),
@@ -186,7 +189,7 @@ ui <- fluidPage(
                  # DATA PANEL MAIN PANEL
                  mainPanel(dataTableOutput("gene_data")))
                ) # end data tab panel
-                ) # end tabsetPanel
+      ) # end tabsetPanel
 ) # end fluidPage
 
 # server -------------------------
@@ -314,6 +317,27 @@ server <- function(input, output) {
     highlight_gene_data()
   })
   
+  # ZOOM PLOT WITH BRUSH -----
+  # initialize reactive value
+  # this is the value that will be input into volcanoPlot()
+  ranges <- reactiveValues(x = NULL, y = NULL)
+  
+  # when there is a double click on the plot
+  # if brush is null, nothing happens,
+  # if brush is not null, assign values to ranges
+  observeEvent(input$volcano_dbl_click, {
+    brush <- input$volcano_brush
+    if (!is.null(brush)) {
+      ranges$x <- c(brush$xmin, brush$xmax)
+      ranges$y <- c(brush$ymin, brush$ymax)
+      
+    } else {
+      ranges$x <- NULL
+      ranges$y <- NULL
+    }
+  })
+  
+  
   # PLOT AND RENDER VOLCANO -----
   
   # volcano plot in reactive function (is this necessary?? can't be sure.)
@@ -331,7 +355,9 @@ server <- function(input, output) {
                 highlight_genes = input$selected_genes,
                 x_label = input$x_axis_lab,
                 y_label = input$y_axis_lab,
-                legend_title = input$legend_title)
+                legend_title = input$legend_title,
+                xlim = ranges$x,
+                ylim = ranges$y)
   })
 
   # output volcano plot
