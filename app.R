@@ -202,7 +202,7 @@ server <- function(input, output) {
                 min = 0,
                 max = round(max(data[[input$logfc_col]])),
                 value = 2,
-                step = .5)
+                step = .1)
   })
   
   # use columns and thresholds selected in UI
@@ -252,18 +252,21 @@ server <- function(input, output) {
   
   # HIGHLIGHTED GENE TABLE -----
 
-  # select genes to highlight
-  output$gene_selector <- renderUI({
-    selectInput("selected_genes",
-                "Select feature(s) to highlight",
-                sort(data[[input$gene_col]]),
-                multiple = TRUE,
-                selectize= TRUE,
-                selected = gene_list$clicked_gene_list)
-  })
+    # select genes to highlight
+    output$gene_selector <- renderUI({
+      selectInput("selected_genes",
+                  "Select feature(s) to highlight",
+                  sort(data[[input$gene_col]]),
+                  multiple = TRUE,
+                  selectize= TRUE,
+                  selected = gene_list$clicked_gene_list)
+      })
     
+    # initialize gene_list$clicked_gene_list as NULL
+    # This will reactively update
     gene_list <- reactiveValues(clicked_gene_list = NULL)
     
+    # store clicked gene info
     clicked_gene <- reactive({
       nearPoints(data_w_log_pval(),
                  input$volcano_click,
@@ -272,6 +275,9 @@ server <- function(input, output) {
         select(input$gene_col)
       })
     
+    # when a point is clicked on the volcano plot
+    # add gene to clicked gene list
+    # if the point has been clicked twice, remove from list
     observeEvent(input$volcano_click, {
       # if gene_list is empty
       # get point info and save gene
