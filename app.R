@@ -5,19 +5,14 @@ library(tidyverse)
 library(data.table)
 
 # source volcano plot script
-# source("/apps/volcano/volcano.R")
-# source("/apps/volcano/click.R")
+source("/apps/volcano/volcano.R")
 
 source("volcano.R")
 
 # look for data file
-# tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
-# csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
-# txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
-
-tsv <- list.files("data/", pattern = ".tsv", full.names = TRUE)
-csv <- list.files("data/", pattern = ".csv", full.names = TRUE)
-txt <- list.files("data/", pattern = ".txt", full.names = TRUE)
+tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
+csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
+txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
 
 if(length(tsv) > 0) {
   data <- read.table(tsv, header = TRUE, sep = "\t")
