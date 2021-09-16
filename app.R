@@ -282,6 +282,10 @@ server <- function(input, output) {
     # add gene to clicked gene list
     # if the point has been clicked twice, remove from list
     observeEvent(input$volcano_click, {
+      # create variable of what has been clicked + selected
+      if (is.null(input$selected_genes)) {
+        gene_list$clicked_gene_list <- NULL
+      }
       # if gene_list is empty
       # get point info and save gene
       if (is.null(gene_list$clicked_gene_list)) {
@@ -289,15 +293,15 @@ server <- function(input, output) {
         # if gene_list is not NULL
         # check to see if gene is in gene_list
       } else {
-        gene_present <- clicked_gene() %in% gene_list$clicked_gene_list
+        gene_present <- clicked_gene() %in% input$selected_genes
         # if TRUE (gene is present already)
         # remove gene from gene list
         if (gene_present) {
-          present_idx <- !grepl(clicked_gene(), gene_list$clicked_gene_list)
+          present_idx <- !grepl(clicked_gene(), input$selected_genes)
           # remove row
-          gene_list$clicked_gene_list <- gene_list$clicked_gene_list[present_idx]
+          gene_list$clicked_gene_list <- input$selected_genes[present_idx]
         } else {
-          gene_list$clicked_gene_list <- c(clicked_gene(), gene_list$clicked_gene_list)
+          gene_list$clicked_gene_list <- c(clicked_gene(), input$selected_genes)
         }
       }
     })
