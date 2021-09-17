@@ -4,7 +4,7 @@ library(shiny)
 library(tidyverse)
 library(data.table)
 
-local <- TRUE
+local <- FALSE
 
 
 if (local) {
