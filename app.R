@@ -7,8 +7,6 @@ library(data.table)
 # source volcano plot script
 source("/apps/volcano/volcano.R")
 
-source("volcano.R")
-
 # look for data file
 tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
 csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
