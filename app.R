@@ -269,7 +269,8 @@ server <- function(input, output) {
       nearPoints(data_w_log_pval(),
                  input$volcano_click,
                  xvar = input$logfc_col,
-                 yvar = .data$log_pval) %>%
+                 yvar = .data$log_pval,
+                 maxpoints = 1) %>%
         select(input$gene_col)
       })
     
@@ -375,7 +376,7 @@ server <- function(input, output) {
   
   # Collect nearpoint info and reduce to only gene_col, logfc_col and pvalue_col
   point_info <- reactive({
-     nearpoint_out <- nearPoints(data_w_log_pval(), input$volcano_hover, xvar = input$logfc_col, yvar = .data$log_pval)
+     nearpoint_out <- nearPoints(data_w_log_pval(), input$volcano_hover, xvar = input$logfc_col, yvar = .data$log_pval, maxpoints = 1)
      nearpoint_out %>%
        select(input$gene_col, input$logfc_col, input$pvalue_col)
    })
