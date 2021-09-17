@@ -4,15 +4,19 @@ library(shiny)
 library(tidyverse)
 library(data.table)
 
-# source volcano plot script
-source("/apps/volcano/volcano.R")
+local <- FALSE
 
-source("volcano.R")
-
-# look for data file
-tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
-csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
-txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
+if (local) {
+  source("volcano.R")
+  tsv <- list.files("data/", pattern = ".tsv", full.names = TRUE)
+  csv <- list.files("data/", pattern = ".csv", full.names = TRUE)
+  txt <- list.files("data/", pattern = ".txt", full.names = TRUE)
+} else {
+  source("/apps/volcano/volcano.R")
+  tsv <- list.files("/work", pattern = ".tsv", full.names = TRUE)
+  csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
+  txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
+}
 
 if(length(tsv) > 0) {
   data <- read.table(tsv, header = TRUE, sep = "\t")
@@ -188,7 +192,7 @@ ui <- fluidPage(
 ) # end fluidPage
 
 # server -------------------------
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   # IDENTIFY DIFFERENTIALLY EXPRESSED GENES -----
   
@@ -256,8 +260,7 @@ server <- function(input, output) {
                   "Select feature(s) to highlight",
                   sort(data[[input$gene_col]]),
                   multiple = TRUE,
-                  selectize= TRUE,
-                  selected = gene_list$clicked_gene_list)
+                  selectize= TRUE)
       })
     
     # initialize gene_list$clicked_gene_list as NULL
@@ -301,6 +304,15 @@ server <- function(input, output) {
         }
       }
     })
+    
+    observe({
+      updateSelectInput(session, 
+                        "selected_genes",
+                        label = "selected_genes",
+                        choices = sort(data[[input$gene_col]]),
+                        selected = gene_list$clicked_gene_list)
+    })
+    
 
   # reactive function that subsets data by highlighted_gene vector
   highlight_gene_data <- reactive({
