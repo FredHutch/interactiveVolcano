@@ -6,6 +6,7 @@ library(data.table)
 
 local <- FALSE
 
+
 if (local) {
   source("volcano.R")
   tsv <- list.files("data/", pattern = ".tsv", full.names = TRUE)
@@ -17,6 +18,7 @@ if (local) {
   csv <- list.files("/work", pattern = ".csv", full.names = TRUE)
   txt <- list.files("/work", pattern = ".txt", full.names = TRUE)
 }
+
 
 if(length(tsv) > 0) {
   data <- read.table(tsv, header = TRUE, sep = "\t")
