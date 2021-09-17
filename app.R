@@ -4,7 +4,7 @@ library(shiny)
 library(tidyverse)
 library(data.table)
 
-local <- FALSE
+local <- TRUE
 
 
 if (local) {
@@ -103,7 +103,7 @@ ui <- fluidPage(
                               uiOutput("logfc_slider"),
                               
                               # HIGHLIGHT GENES -----
-                              h4("Highlight features of interest:"),
+                              h4("Label features of interest:"),
                               
                               # select column for gene ID input
                               selectInput("gene_col",
@@ -144,7 +144,11 @@ ui <- fluidPage(
                  # VOLCANO PLOT MAIN PANEL -----
                  mainPanel(
                    # output info from click
-                   p("Hover over points to view features label, effect size, and significance."),
+                   p(strong("Plot interactivity:")),
+                   p("- View a point's feature label, effect size, and significance by hovering over a point."),
+                   p("- Add labels to a feature of interest by using the gene selection dropdown in the sidebar or clicking on the point on the plot."),
+                   p("- Remove a label by deleting the selection from the gene selection dropdown or clicking the point on plot a second time."),
+                   p("- To zoom click and drag over the plot to select the area you wish to zoom in on. Then, double click to zoom into the selected area. Double click again to zoom out."),
                    verbatimTextOutput("click_info",
                                       placeholder = TRUE),
                    
@@ -259,7 +263,7 @@ server <- function(input, output, session) {
     # select genes to highlight
     output$gene_selector <- renderUI({
       selectInput("selected_genes",
-                  "Select feature(s) to highlight",
+                  "Select feature(s) to label",
                   sort(data[[input$gene_col]]),
                   multiple = TRUE,
                   selectize= TRUE)
@@ -310,7 +314,7 @@ server <- function(input, output, session) {
     observe({
       updateSelectInput(session, 
                         "selected_genes",
-                        label = "selected_genes",
+                        label = "Select feature(s) to label",
                         choices = sort(data[[input$gene_col]]),
                         selected = gene_list$clicked_gene_list)
     })
