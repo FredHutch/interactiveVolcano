@@ -3,11 +3,10 @@
 ##################################
 plotVolcano <- function(data, 
                         logfc_col, 
-                        pval_col, 
+                        pvalue_col, 
                         gene_col, 
-                        pval_thresh, 
+                        pvalue_thresh, 
                         logfc_thresh,
-                        de_vec,
                         color_by_de,
                         show_logfc_thresh,
                         show_pvalue_thresh,
@@ -16,15 +15,17 @@ plotVolcano <- function(data,
                         y_label,
                         legend_title,
                         xlim,
-                        ylim) {
+                        ylim,
+                        de_vec) {
   # check that columns exist
-  if (!all(c(logfc_col, pval_col, gene_col) %in% colnames(data))) {
+  # FIXME don't include gene_col as required
+  if (!all(c(logfc_col, pvalue_col) %in% colnames(data))) {
     stop("provided column names do not match dataset")
   }
   
   # convert pval to -log10(pval)
   data <- mutate(data,
-                 log_pval = -log10(data[[pval_col]]))
+                 log_pval = -log10(data[[pvalue_col]]))
   
   # Reorder de_vec factors so that TRUE is first
   de_vec <- factor(de_vec, levels=c("TRUE", "FALSE"))
@@ -35,7 +36,7 @@ plotVolcano <- function(data,
                    logfc_col,
                    x_label)
   axes$y <- ifelse(y_label == "",
-                   paste0("-log10(", pval_col, ")"),
+                   paste0("-log10(", pvalue_col, ")"),
                    y_label)
   
   # build base of plot
@@ -57,7 +58,7 @@ plotVolcano <- function(data,
   # if show_pvalue_thresh = true add vline layer
   if (show_pvalue_thresh) {
     volcano <- volcano + 
-      geom_hline(yintercept = -log10(pval_thresh), linetype = "dashed", col = "grey", size = 1)
+      geom_hline(yintercept = -log10(pvalue_thresh), linetype = "dashed", col = "grey", size = 1)
   }
   
   # if show_logfc_thresh = true add hline layer
@@ -67,6 +68,7 @@ plotVolcano <- function(data,
   }
   
   # if highlight_genes isn't null, add to plot
+  # add error handling for missing gene_Col
   if (!is.null(highlight_genes)) {
     # create vector of gene ids for label
     labels <- data[data[[gene_col]] %in% highlight_genes,]
