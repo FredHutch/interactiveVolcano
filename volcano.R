@@ -29,16 +29,7 @@ plotVolcano <- function(data,
   
   # Reorder de_vec factors so that TRUE is first
   de_vec <- factor(de_vec, levels=c("TRUE", "FALSE"))
-  
-  # create axes names
-  axes <- NULL
-  axes$x <- ifelse(x_label == "",
-                   logfc_col,
-                   x_label)
-  axes$y <- ifelse(y_label == "",
-                   paste0("-log10(", pvalue_col, ")"),
-                   y_label)
-  
+
   # build base of plot
   volcano <- ggplot(data, aes(x = .data[[logfc_col]], y = log_pval))
   
@@ -79,7 +70,7 @@ plotVolcano <- function(data,
   
   # add finishing touches to plot
   volcanoPlot <- volcano +
-    labs(x = axes$x, y = axes$y, color = legend_title) +
+    labs(x = x_label, y = y_label, color = legend_title) +
     theme_classic(base_size = 12)
   
   # display plot
