@@ -4,7 +4,7 @@ library(shiny)
 library(tidyverse)
 library(data.table)
 
-local <- FALSE
+local <- TRUE
 
 
 if (local) {
@@ -362,9 +362,9 @@ server <- function(input, output, session) {
   reactive_volcano <- reactive({
     plotVolcano(data = data, 
                 logfc_col = input$logfc_col, 
-                pval_col = input$pvalue_col,
+                pvalue_col = input$pvalue_col,
                 gene_col = input$gene_col,
-                pval_thresh = input$pvalue_threshold,
+                pvalue_thresh = input$pvalue_threshold,
                 logfc_thresh = input$logfc_threshold,
                 de_vec = is_de(),
                 color_by_de = input$color_by_de,
