@@ -2,10 +2,6 @@
 
 An interactive shiny app for creating and editing volcano plots. A volcano plot is a type of scatter plot represents differential expression of features (genes for example): on the x-axis we typically find the fold change and on the y-axis the p-value.
 
-The `master` branch is set up to run in a specific docker environement.
-
-To run locally use the `local` branch. Replace the example dataset in the `data` directory with your dataset in to run the application with your own data.
-
 ### Set up
 
 The easiest way to install this application is to clone it from this GitHub. Open the command line (terminal on Mac) and type the following commands:
@@ -23,8 +19,9 @@ git clone https://github.com/FredHutch/interactiveVolcano.git
 Enter the repository and switch to the local branch
 ```
 cd interactiveVolcano
-git checkout local
 ```
+
+Open `app.R` and switch `local` to `local <- TRUE` 
 
 ### Adding your data 
 
