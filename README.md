@@ -31,6 +31,8 @@ Run the app from RStudio:
 1. Open `app.R`.
 2. Click `Run App` in the top right hand corner.
 
+>Make sure that RStudio's working directory points to the application
+
 Run from the command line:
 
 1. Navigate to the `interactiveVolcano` directory
