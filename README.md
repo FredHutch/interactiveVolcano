@@ -16,18 +16,13 @@ Clone this repository
 git clone https://github.com/FredHutch/interactiveVolcano.git
 ```
 
-Enter the repository and switch to the local branch
-```
-cd interactiveVolcano
-```
-
-Open `app.R` and switch `local` to `local <- TRUE` 
+This app is built to work in a specific private Docker environment. To run locally, open `app.R` and switch the variable `local` to `local <- TRUE` 
 
 ### Adding your data 
 
-This shiny app takes a single file input. It is a dataframe with at least three columns: gene ID, significance value, and effect size. The dataframe shoudl be saved as either a `.csv`, `.tsv`, or `.txt`.
+This shiny app takes a single file input. It is a dataframe with at least three columns: gene ID, significance value, and effect size. The dataframe should be saved as either a `.csv`, `.tsv`, or `.txt`.
 
-If running locally replace the example dataset in `interactiveVolcano/data` with your dataset.
+Replace the example dataset in `interactiveVolcano/data` with your dataset.
 
 ### Running the app
 
